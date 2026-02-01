@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Clock Ultimate 2026 - Global Phases</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --bg-body: #020617;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.45);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent: #22d3ee;
+        }
+
+        .light-theme {
+            --bg-body: #f8fafc;
+            --text-main: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(0, 0, 0, 0.1);
+            --accent: #0891b2;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .time-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .am-pm {
+            font-size: 1rem;
+            margin-left: 5px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .offset-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(34, 211, 238, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        @keyframes pulse-custom { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .animate-phase { animation: pulse-custom 3s infinite ease-in-out; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <header class="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div>
+            <h1 class="text-5xl font-black tracking-tighter mb-2">ULTI<span class="text-cyan-500">CLOCK</span></h1>
+            <p class="text-slate-500 font-medium">Dashboard Jam Dunia • Edisi 2026</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="toggleTheme()" class="p-3 rounded-full glass-card hover:bg-cyan-500 hover:text-white transition shadow-xl">
+                <span id="theme-icon" class="text-xl">🌙</span>
+            </button>
+            <div class="px-6 py-2 glass-card rounded-2xl border-cyan-500/30 border hidden md:block text-center">
+                <p class="text-[10px] uppercase font-bold text-cyan-500">Referensi Utama</p>
+                <p class="font-black text-lg">WITA</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto space-y-10">
+        <!-- Indonesia Main Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- WITA -->
+            <div class="glass-card p-8 rounded-[2.5rem] border-l-8 border-l-amber-400">
+                <div class="flex justify-between items-start mb-4">
+                    <div id="icon-wita" class="text-5xl animate-phase"></div>
+                    <span id="badge-wita" class="px-4 py-1 rounded-full text-[10px] font-black uppercase text-white shadow-lg">...</span>
+                </div>
+                <h2 class="text-2xl font-black mb-4 flex items-center gap-2">📍 Lokasi Saya (WITA)</h2>
+                <div class="time-display mono flex items-baseline">
+                    <span id="time-wita">00:00:00</span>
+                    <span id="ampm-wita" class="am-pm">--</span>
+                </div>
+                <p id="date-wita" class="text-slate-500 mt-2 font-bold italic">...</p>
+            </div>
+
+            <!-- JAKARTA -->
+            <div class="glass-card p-8 rounded-[2.5rem] border-l-8 border-l-cyan-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div id="icon-wib" class="text-5xl animate-phase"></div>
+                    <span id="badge-wib" class="px-4 py-1 rounded-full text-[10px] font-black uppercase text-white shadow-lg">...</span>
+                </div>
+                <h2 class="text-2xl font-black mb-4">Jakarta (WIB)</h2>
+                <div class="time-display mono flex items-baseline">
+                    <span id="time-wib">00:00:00</span>
+                    <span id="ampm-wib" class="am-pm">--</span>
+                </div>
+                <div class="flex items-center gap-3 mt-2">
+                    <p id="date-wib" class="text-slate-500 font-bold">...</p>
+                    <span id="offset-wib" class="offset-badge">-1 Jam dari WITA</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Cards -->
+        <div id="global-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <footer class="max-w-7xl mx-auto mt-20 pb-10 text-center opacity-40 text-xs tracking-[0.3em] font-black uppercase">
+        &copy; 2026 World Clock Dashboard • Sistem Deteksi Tengah Hari & Malam
+    </footer>
+
+    <script>
+        const configs = [
+            { id: 'wita', name: 'WITA', tz: 'Asia/Makassar' },
+            { id: 'wib', name: 'Jakarta', tz: 'Asia/Jakarta' },
+            { id: 'mekkah', name: 'Mekah', tz: 'Asia/Riyadh', flag: '🕋' },
+            { id: 'usa', name: 'New York', tz: 'America/New_York', flag: '🇺🇸' },
+            { id: 'japan', name: 'Tokyo', tz: 'Asia/Tokyo', flag: '🇯🇵' },
+            { id: 'korea', name: 'Seoul', tz: 'Asia/Seoul', flag: '🇰🇷' },
+            { id: 'china', name: 'Beijing', tz: 'Asia/Shanghai', flag: '🇨🇳' },
+            { id: 'russia', name: 'Moskow', tz: 'Europe/Moscow', flag: '🇷🇺' }
+        ];
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            document.getElementById('theme-icon').textContent = document.body.classList.contains('light-theme') ? '☀️' : '🌙';
+        }
+
+        function getFullTimeStatus(hour, minute) {
+            // Deteksi Tepat Tengah Hari & Tengah Malam
+            if (hour === 12 && minute === 0) return { text: 'Tengah Hari', icon: '🕛', color: 'bg-orange-600' };
+            if (hour === 0 && minute === 0) return { text: 'Tengah Malam', icon: '🕛', color: 'bg-black' };
+            
+            // Fase Reguler
+            if (hour >= 4 && hour < 6) return { text: 'Subuh', icon: '🌅', color: 'bg-indigo-600' };
+            if (hour >= 6 && hour < 11) return { text: 'Pagi', icon: '☀️', color: 'bg-amber-400' };
+            if (hour >= 11 && hour < 15) return { text: 'Siang', icon: '☀️', color: 'bg-orange-500' };
+            if (hour >= 15 && hour < 18) return { text: 'Sore', icon: '🌇', color: 'bg-rose-500' };
+            return { text: 'Malam', icon: '🌙', color: 'bg-slate-800' };
+        }
+
+        function createCards() {
+            const container = document.getElementById('global-container');
+            configs.slice(2).forEach(loc => {
+                container.innerHTML += `
+                    <div class="glass-card p-6 rounded-[2rem] flex flex-col justify-between border-t-4 border-t-cyan-500/20">
+                        <div>
+                            <div class="flex justify-between items-start mb-6">
+                                <div id="icon-${loc.id}" class="text-4xl animate-phase"></div>
+                                <span id="badge-${loc.id}" class="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase text-white shadow-md">...</span>
+                            </div>
+                            <h4 class="font-black text-xl flex items-center gap-2 mb-1">${loc.flag} ${loc.name}</h4>
+                            <div id="offset-${loc.id}" class="offset-badge mb-4 inline-block italic">Menghitung...</div>
+                            <div class="text-3xl font-black mono flex items-baseline mb-1">
+                                <span id="time-${loc.id}">00:00:00</span>
+                                <span id="ampm-${loc.id}" class="am-pm text-xs">--</span>
+                            </div>
+                        </div>
+                        <p id="date-${loc.id}" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest border-t border-slate-700/20 pt-4 mt-2">...</p>
+                    </div>
+                `;
+            });
+        }
+
+        function calculateOffset(targetTz) {
+            const now = new Date();
+            const witaDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Makassar' }));
+            const targetDate = new Date(now.toLocaleString('en-US', { timeZone: targetTz }));
+            const diffHours = Math.round((targetDate - witaDate) / (1000 * 60 * 60));
+            if (diffHours === 0) return "Sama dengan WITA";
+            return `${Math.abs(diffHours)} Jam ${diffHours > 0 ? 'Cepat' : 'Lambat'}`;
+        }
+
+        function update() {
+            const now = new Date();
+            configs.forEach(loc => {
+                const timeStr = now.toLocaleTimeString('en-US', { timeZone: loc.tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                const [time, ampm] = timeStr.split(' ');
+                
+                const hour24 = parseInt(now.toLocaleTimeString('en-GB', { timeZone: loc.tz, hour: '2-digit', hour12: false }));
+                const minute = parseInt(now.toLocaleTimeString('en-GB', { timeZone: loc.tz, minute: '2-digit' }));
+                
+                const phase = getFullTimeStatus(hour24, minute);
+
+                const timeEl = document.getElementById(`time-${loc.id}`);
+                const ampmEl = document.getElementById(`ampm-${loc.id}`);
+                const dateEl = document.getElementById(`date-${loc.id}`);
+                const badgeEl = document.getElementById(`badge-${loc.id}`);
+                const iconEl = document.getElementById(`icon-${loc.id}`);
+
+                if(timeEl) timeEl.textContent = time;
+                if(ampmEl) ampmEl.textContent = ampm;
+                if(dateEl) dateEl.textContent = now.toLocaleDateString('id-ID', { timeZone: loc.tz, weekday: 'long', day: 'numeric', month: 'short' });
+                
+                if(badgeEl) {
+                    badgeEl.textContent = phase.text;
+                    badgeEl.className = `px-3 py-1 rounded-full text-[10px] font-black uppercase text-white shadow-lg ${phase.color} transition-all duration-500`;
+                }
+                
+                if(iconEl) iconEl.textContent = phase.icon;
+                
+                if (loc.id !== 'wita') {
+                    const offsetEl = document.getElementById(`offset-${loc.id}`);
+                    if(offsetEl) offsetEl.textContent = calculateOffset(loc.tz);
+                }
+            });
+        }
+
+        createCards();
+        setInterval(update, 1000);
+        update();
+    </script>
+</body>
+</html>
+
